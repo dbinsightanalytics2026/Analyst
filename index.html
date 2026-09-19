@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>APFR – ePanta Land Parcel Reconciliation Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1d2733;--mute:#6b7785;--line:#e3e8ee;--side:#12324a;--side2:#1b4766;--acc:#0b7a5b;--blue:#2563eb;--amber:#d97706;--red:#dc2626;--green:#16a34a;--violet:#7c3aed}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;display:flex}
+aside{width:250px;background:var(--side);color:#dbe7f1;display:flex;flex-direction:column;flex:none;height:100vh;position:sticky;top:0}
+aside h1{font-size:15px;margin:0;padding:18px 18px 4px;color:#fff;line-height:1.3}
+aside .sub{font-size:11px;padding:0 18px 16px;color:#8fb0c9;border-bottom:1px solid #ffffff22}
+nav{padding:10px 8px;flex:1}
+nav a{display:flex;gap:10px;align-items:center;padding:11px 12px;margin:2px 0;border-radius:8px;color:#dbe7f1;text-decoration:none;cursor:pointer;font-size:14px}
+nav a:hover{background:var(--side2)}nav a.on{background:#fff;color:var(--side);font-weight:600}
+nav a i{font-style:normal;width:20px;text-align:center}
+aside .foot{padding:12px 18px;font-size:11px;color:#8fb0c9;border-top:1px solid #ffffff22}
+main{flex:1;min-width:0;padding:22px 26px 60px;overflow-x:hidden}
+h2{margin:0 0 4px;font-size:22px}h3{margin:0 0 10px;font-size:15px}
+.lead{color:var(--mute);margin:0 0 18px}
+.grid{display:grid;gap:14px}.kpis{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 1px 2px #0000000a}
+.kpi .l{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.03em}
+.kpi .v{font-size:26px;font-weight:700;margin-top:4px}.kpi .s{font-size:12px;color:var(--mute);margin-top:2px}
+.kpi{border-left:4px solid var(--blue)}.kpi.g{border-color:var(--green)}.kpi.a{border-color:var(--amber)}.kpi.r{border-color:var(--red)}.kpi.v{border-color:var(--violet)}
+.two{grid-template-columns:repeat(auto-fit,minmax(380px,1fr));margin-bottom:14px}
+.crumb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 12px;font-size:13px}
+.crumb a{color:var(--blue);cursor:pointer;text-decoration:none}.crumb a:hover{text-decoration:underline}.crumb span.sep{color:var(--mute)}
+.crumb b{color:var(--ink)}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+select,input[type=text],input[type=search]{padding:8px 10px;border:1px solid #cfd7e0;border-radius:8px;font-size:14px;background:#fff;min-width:170px}
+button{padding:8px 14px;border:0;border-radius:8px;background:var(--acc);color:#fff;font-size:13px;cursor:pointer;font-weight:600}
+button.sec{background:#e8eef4;color:var(--ink)}button:disabled{opacity:.5;cursor:default}
+.tw{overflow:auto;max-height:66vh;border:1px solid var(--line);border-radius:10px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{position:sticky;top:0;background:#eef3f8;z-index:2;cursor:pointer;font-weight:600;color:#33475b;user-select:none}
+th:hover{background:#e2eaf2}
+td.t,th.t{text-align:left}
+tbody tr:hover{background:#f7fafd}
+tr.tot td{position:sticky;bottom:0;background:#12324a;color:#fff;font-weight:700;border:0;z-index:2}
+a.dl{color:var(--blue);cursor:pointer;font-weight:600}a.dl:hover{text-decoration:underline}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.p-m{background:#dcfce7;color:#166534}.p-p{background:#fef3c7;color:#92400e}.p-e{background:#fee2e2;color:#991b1b}
+.sv{max-width:380px;white-space:normal;word-break:break-word;max-height:4.6em;overflow:auto;text-align:left;font-size:12px}
+.bar{height:8px;border-radius:4px;background:#e5e9ee;overflow:hidden;min-width:70px;display:inline-block;width:70px;vertical-align:middle}
+.bar i{display:block;height:100%;background:var(--green)}
+.pg{display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--mute);font-size:13px}
+.msg{padding:14px;border-radius:10px;background:#eff6ff;color:#1e3a8a;margin:10px 0}.msg.err{background:#fef2f2;color:#991b1b}
+.note{font-size:12px;color:var(--mute);margin-top:8px;line-height:1.5}
+svg text{font-family:inherit}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--mute);margin-top:8px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+.sect{margin:22px 0 8px;font-size:16px;font-weight:700}
+@media(max-width:800px){body{flex-direction:column}aside{width:100%;height:auto;position:static}nav{display:flex;overflow:auto}main{padding:14px}}
+</style></head>
+<body>
+<aside>
+<h1>APFR vs ePanta<br>Land Parcel Dashboard</h1>
+<div class="sub">Survey–Khata comparison · data as of 19-09-2026</div>
+<nav>
+<a data-p="exec" class="on"><i>📊</i>Executive Dashboard</a>
+<a data-p="dist"><i>🗺️</i>District-wise Report</a>
+<a data-p="srch"><i>🔍</i>Farmer / Khata Search</a>
+<a data-p="ana"><i>🧭</i>Field Staff Analytics</a>
+</nav>
+<div class="foot">Farmer-level data loads on demand from the <b>data/</b> folder – keep it next to this file.</div>
+</aside>
+<main id="main"></main>
+<script src="aggdata.js"></script>
+<script>
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const nf=n=>Number(n).toLocaleString('en-IN');
+const pct=(a,b)=>b?((a/b)*100):0;
+const pf=(a,b)=>pct(a,b).toFixed(1)+'%';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// village vector: [code,name,f,a,e,mf,pf,pp,ef,ep,mp,q]
+const K=['farmers','apfr','epanta','mf','pf','pp','ef','ep','mp','q'];
+function sumV(list){const s=new Array(10).fill(0);for(const v of list)for(let i=0;i<10;i++)s[i]+=v[i+2];return s}
+const DIST=AGG.D;
+DIST.forEach(d=>{d.vil=[];d.m.forEach(m=>{m.vil=m.v;m.s=sumV(m.v);m.nv=m.v.length;m.v.forEach(v=>{v.push(d.n,m.n,d.c,m.c)});d.vil.push(...m.v)});d.s=sumV(d.vil);d.nm=d.m.length;d.nv=d.vil.length});
+// village extra fields idx: 12 dname,13 mname,14 dcode,15 mcode
+const ALLV=DIST.flatMap(d=>d.vil);
+const TOT=sumV(ALLV);
+const dataCache={};
+function loadDistrict(dc){
+  return new Promise((res,rej)=>{
+    if(window.DD&&window.DD[dc])return res(window.DD[dc]);
+    const s=document.createElement('script');s.src='data/d_'+dc+'.js';
+    s.onload=()=>window.DD&&window.DD[dc]?res(window.DD[dc]):rej(new Error('empty'));
+    s.onerror=()=>rej(new Error('Cannot load data/d_'+dc+'.js – keep the "data" folder next to index.html'));
+    document.head.appendChild(s);
+  });
+}
+function downloadCSV(name,head,rows){
+  const q=v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const t='\ufeff'+[head.map(q).join(',')].concat(rows.map(r=>r.map(q).join(','))).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download=name;a.click();
+}
+/* ---------- SVG charts ---------- */
+const C={blue:'#2563eb',green:'#16a34a',amber:'#f59e0b',red:'#dc2626',violet:'#7c3aed',grey:'#94a3b8',teal:'#0d9488'};
+function donut(items,center){
+  const tot=items.reduce((a,b)=>a+b.v,0)||1,R=70,r=44,cx=90,cy=90;let ang=-Math.PI/2,out='';
+  items.forEach(it=>{const a=it.v/tot*2*Math.PI;if(a<=0)return;const a2=ang+a,lg=a>Math.PI?1:0;
+    const p=(R_,t)=>[cx+R_*Math.cos(t),cy+R_*Math.sin(t)];
+    const [x1,y1]=p(R,ang),[x2,y2]=p(R,a2-0.0001),[x3,y3]=p(r,a2-0.0001),[x4,y4]=p(r,ang);
+    out+=`<path d="M${x1},${y1}A${R},${R} 0 ${lg} 1 ${x2},${y2}L${x3},${y3}A${r},${r} 0 ${lg} 0 ${x4},${y4}Z" fill="${it.c}"><title>${esc(it.l)}: ${nf(it.v)} (${(it.v/tot*100).toFixed(1)}%)</title></path>`;ang=a2});
+  const leg=items.map(it=>`<div style="display:flex;justify-content:space-between;gap:14px;margin:6px 0"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${it.c};margin-right:6px"></i>${esc(it.l)}</span><b>${nf(it.v)} <span style="color:var(--mute);font-weight:400">(${(it.v/tot*100).toFixed(1)}%)</span></b></div>`).join('');
+  return `<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap"><svg width="180" height="180" viewBox="0 0 180 180">${out}<text x="90" y="86" text-anchor="middle" font-size="11" fill="#6b7785">${esc(center[0])}</text><text x="90" y="104" text-anchor="middle" font-size="15" font-weight="700">${esc(center[1])}</text></svg><div style="flex:1;min-width:200px;font-size:13px">${leg}</div></div>`;
+}
+function hbars(items,opt={}){ // items {l,v,c,sub}
+  const rh=opt.rh||24,lw=opt.lw||190,w=opt.w||560,max=Math.max(...items.map(i=>i.v),1),bw=w-lw-120;
+  let y=0,out='';
+  items.forEach(it=>{const bl=Math.max(it.v/max*bw,it.v>0?1:0);
+   out+=`<g><text x="${lw-8}" y="${y+rh/2+4}" text-anchor="end" font-size="12" fill="#33475b">${esc(it.l.length>30?it.l.slice(0,29)+'…':it.l)}</text><rect x="${lw}" y="${y+4}" width="${bl}" height="${rh-8}" rx="3" fill="${it.c||C.blue}"><title>${esc(it.l)}: ${nf(it.v)}</title></rect><text x="${lw+bl+6}" y="${y+rh/2+4}" font-size="11" fill="#1d2733">${nf(it.v)}${it.sub?' · '+it.sub:''}</text></g>`;y+=rh});
+  return `<div style="overflow:auto;max-height:${opt.mh||560}px"><svg style="width:100%;max-width:${w}px;height:auto" viewBox="0 0 ${w} ${y}">${out}</svg></div>`;
+}
+function stacked(items,keys,colors,opt={}){ // 100% stacked; items {l, vals[]}
+  const rh=24,lw=190,w=600,bw=w-lw-10;let y=0,out='';
+  items.forEach(it=>{const t=it.vals.reduce((a,b)=>a+b,0)||1;let x=lw;
+    out+=`<text x="${lw-8}" y="${y+rh/2+4}" text-anchor="end" font-size="12" fill="#33475b">${esc(it.l.length>30?it.l.slice(0,29)+'…':it.l)}</text>`;
+    it.vals.forEach((v,i)=>{const ww=v/t*bw;if(ww>0)out+=`<rect x="${x}" y="${y+4}" width="${ww}" height="${rh-8}" fill="${colors[i]}"><title>${esc(it.l)} – ${esc(keys[i])}: ${nf(v)} (${(v/t*100).toFixed(1)}%)</title></rect>`;x+=ww});y+=rh});
+  return `<div style="overflow:auto;max-height:${opt.mh||560}px"><svg style="width:100%;max-width:${w}px;height:auto" viewBox="0 0 ${w} ${y}">${out}</svg></div><div class="legend">${keys.map((k,i)=>`<span><i style="background:${colors[i]}"></i>${esc(k)}</span>`).join('')}</div>`;
+}
+function vbars(items,opt={}){
+  const w=opt.w||560,h=230,pl=48,pb=62,pt=14,max=Math.max(...items.map(i=>i.v),1),bw=(w-pl)/items.length;let out='';
+  for(let g=0;g<=4;g++){const yy=pt+(h-pt-pb)*(1-g/4);out+=`<line x1="${pl}" x2="${w}" y1="${yy}" y2="${yy}" stroke="#e5e9ee"/><text x="${pl-6}" y="${yy+4}" text-anchor="end" font-size="10" fill="#6b7785">${nf(Math.round(max*g/4))}</text>`}
+  items.forEach((it,i)=>{const bh=it.v/max*(h-pt-pb),x=pl+i*bw+bw*0.15;
+    out+=`<rect x="${x}" y="${h-pb-bh}" width="${bw*0.7}" height="${bh}" rx="3" fill="${it.c||C.blue}"><title>${esc(it.l)}: ${nf(it.v)}</title></rect><text x="${x+bw*0.35}" y="${h-pb-bh-4}" text-anchor="middle" font-size="10">${nf(it.v)}</text><text transform="translate(${x+bw*0.35},${h-pb+12}) rotate(35)" font-size="10" fill="#33475b">${esc(it.l)}</text>`});
+  return `<div style="overflow:auto"><svg style="width:100%;max-width:${w}px;height:auto" viewBox="0 0 ${w} ${h}">${out}</svg></div>`;
+}
+/* ---------- router ---------- */
+const pages={};let cur='exec';
+document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>go(a.dataset.p));
+function go(p){cur=p;document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.p===p));$('#main').innerHTML='';pages[p]();window.scrollTo(0,0)}
+function kpi(l,v,s,cls=''){return `<div class="card kpi ${cls}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s||''}</div></div>`}
+
+/* ---------- 1. Executive ---------- */
+pages.exec=function(){
+  const [F,A,E,MF,PF,PP,EF,EP,MP,Q]=TOT;
+  const nm=DIST.reduce((a,d)=>a+d.nm,0);
+  $('#main').innerHTML=`<h2>Executive Dashboard</h2><p class="lead">State-level position of land parcels in ePanta vs APFR (${nf(DIST.length)} districts · ${nf(nm)} mandals · ${nf(ALLV.length)} villages)</p>
+  <div class="grid kpis">
+   ${kpi('Farmer IDs',nf(F),'unique farmer records')}
+   ${kpi('Land parcels – ePanta',nf(E),'crop-booked parcels','v')}
+   ${kpi('Land parcels – APFR',nf(A),'parcels available in APFR','v')}
+   ${kpi('Matched land parcels',nf(MP),pf(MP,E)+' of ePanta parcels','g')}
+   ${kpi('Matched farmer IDs',nf(MF),pf(MF,F)+' of farmers (ePanta = APFR)','g')}
+   ${kpi('Pending – to be booked in APFR',nf(PP),'parcels · '+pf(PP,E)+' of ePanta','a')}
+   ${kpi('Farmers with pending parcels',nf(PF),pf(PF,F)+' of farmers','a')}
+   ${kpi('Quick wins (1 parcel pending)',nf(Q),'farmers needing just one parcel','a')}
+   ${kpi('APFR excess over ePanta',nf(EP),'parcels · '+nf(EF)+' farmers','r')}
+   ${kpi('Net difference (APFR − ePanta)',nf(A-E),'positive = APFR has more')}
+  </div>
+  <div class="grid two">
+   <div class="card"><h3>Farmer IDs – reconciliation status</h3>${donut([{l:'Matched',v:MF,c:C.green},{l:'Pending in APFR (ePanta > APFR)',v:PF,c:C.amber},{l:'APFR excess (APFR > ePanta)',v:EF,c:C.red}],['Farmers',nf(F)])}</div>
+   <div class="card"><h3>ePanta parcels – booked vs pending in APFR</h3>${donut([{l:'Matched parcels',v:MP,c:C.green},{l:'To be booked in APFR',v:PP,c:C.amber}],['ePanta parcels',nf(E)])}
+   <div class="note">Matched parcels per farmer = smaller of ePanta and APFR counts.</div></div>
+  </div>
+  <div class="grid two">
+   <div class="card"><h3>Pending parcels to be booked in APFR – by district</h3>${hbars([...DIST].sort((a,b)=>b.s[5]-a.s[5]).map(d=>({l:d.n,v:d.s[5],c:C.amber,sub:pf(d.s[5],d.s[2])})),{mh:600})}</div>
+   <div class="card"><h3>Farmer status mix – by district (sorted by % matched)</h3>${stacked([...DIST].sort((a,b)=>pct(b.s[3],b.s[0])-pct(a.s[3],a.s[0])).map(d=>({l:d.n,vals:[d.s[3],d.s[4],d.s[6]]})),['Matched','Pending in APFR','APFR excess'],[C.green,C.amber,C.red],{mh:600})}</div>
+  </div>
+  <div class="grid two">
+   <div class="card"><h3>Farmers by size of difference</h3>${vbars(AGG.meta.hist.map((v,i)=>({l:AGG.meta.histL[i],v,c:i<5?C.red:i===5?C.green:C.amber})))}<div class="note">Red = APFR has more parcels than ePanta · Green = matched · Amber = parcels to be added in APFR.</div></div>
+   <div class="card"><h3>Parcels – ePanta vs APFR (top 12 districts by ePanta parcels)</h3>${(()=>{const t=[...DIST].sort((a,b)=>b.s[2]-a.s[2]).slice(0,12);
+     return hbars(t.flatMap(d=>[{l:d.n+' · ePanta',v:d.s[2],c:C.violet},{l:d.n+' · APFR',v:d.s[1],c:C.teal}]),{rh:20,lw:200,w:600,mh:600})})()}</div>
+  </div>`;
+};
+
+/* ---------- 2. District-wise drilldown ---------- */
+let dv={level:'state',d:null,m:null,v:null,sort:{k:null,dir:-1},page:0,q:'',st:'all'};
+pages.dist=function(){renderDist()};
+function crumb(){
+  let h=`<a onclick="dvGo('state')">All Districts</a>`;
+  if(dv.d)h+=`<span class="sep">›</span>`+(dv.level==='district'?`<b>${esc(dv.d.n)}</b>`:`<a onclick="dvGo('district')">${esc(dv.d.n)}</a>`);
+  if(dv.m)h+=`<span class="sep">›</span>`+(dv.level==='mandal'?`<b>${esc(dv.m.n)}</b>`:`<a onclick="dvGo('mandal')">${esc(dv.m.n)}</a>`);
+  if(dv.v)h+=`<span class="sep">›</span><b>${esc(dv.v[1])}</b>`;
+  return `<div class="crumb">${h}</div>`;
+}
+window.dvGo=function(l){dv.level=l;if(l==='state'){dv.d=dv.m=dv.v=null}if(l==='district'){dv.m=dv.v=null}if(l==='mandal'){dv.v=null}dv.sort={k:null,dir:-1};dv.page=0;dv.q='';dv.st='all';renderDist()};
+window.dvDown=function(i){
+  if(dv.level==='state'){dv.d=DIST[i];dv.level='district'}
+  else if(dv.level==='district'){dv.m=dv.d.m[i];dv.level='mandal'}
+  else if(dv.level==='mandal'){dv.v=dv.m.v[i];dv.level='village'}
+  dv.sort={k:null,dir:-1};dv.page=0;dv.q='';dv.st='all';renderDist();
+};
+window.dvSort=function(k){dv.sort.dir=dv.sort.k===k?-dv.sort.dir:-1;dv.sort.k=k;dv.page=0;renderDist()};
+const SUMCOLS=[['Farmer IDs',0],['ePanta parcels',2],['APFR parcels',1],['Matched parcels',8],['Matched farmers',3],['Farmers to add',4],['To be added in APFR (parcels)',5],['Farmers with APFR excess',6],['APFR excess (parcels)',7]];
+function vecOf(x){return x.s||x} 
+function renderDist(){
+  const M=$('#main');
+  const head=`<h2>District-wise Report</h2><p class="lead">Drill down: District → Mandal → Village → Farmer ID. Click a name to go deeper; click column headers to sort.</p>${crumb()}`;
+  if(dv.level==='village'){return renderFarmers(head)}
+  let rows,label,nlabel;
+  if(dv.level==='state'){rows=DIST.map((d,i)=>({i,n:d.n,cnt:d.nm,s:d.s}));label='District';nlabel='Mandals'}
+  else if(dv.level==='district'){rows=dv.d.m.map((m,i)=>({i,n:m.n,cnt:m.nv,s:m.s}));label='Mandal';nlabel='Villages'}
+  else{rows=dv.m.v.map((v,i)=>({i,n:v[1],cnt:null,s:v.slice(2,12)}));label='Village';nlabel=null}
+  const cols=SUMCOLS.map(c=>c[0]);
+  if(dv.sort.k!==null){const k=dv.sort.k;rows.sort((a,b)=>k==='n'?dv.sort.dir*-a.n.localeCompare(b.n):k==='cnt'?dv.sort.dir*((a.cnt||0)-(b.cnt||0)):k==='pctm'?dv.sort.dir*(pct(a.s[8],a.s[2])-pct(b.s[8],b.s[2])):dv.sort.dir*(a.s[k]-b.s[k]))}
+  const tot=sumV(rows.map(r=>[0,0,...r.s]));const tc=rows.reduce((a,r)=>a+(r.cnt||0),0);
+  let h=`<div class="tools"><button class="sec" onclick="dvCsv()">⬇ Download CSV</button><span class="note" style="margin:0">Match % = matched parcels ÷ ePanta parcels. "To be added in APFR" = ePanta parcels not yet in APFR.</span></div><div class="tw"><table><thead><tr><th class="t">#</th><th class="t" onclick="dvSort('n')">${label}</th>${nlabel?`<th onclick="dvSort('cnt')">${nlabel}</th>`:''}${SUMCOLS.map(c=>`<th onclick="dvSort(${c[1]})">${c[0]}</th>`).join('')}<th onclick="dvSort('pctm')">Match %</th></tr></thead><tbody>`;
+  rows.forEach((r,j)=>{const mp=pct(r.s[8],r.s[2]);
+    h+=`<tr><td class="t">${j+1}</td><td class="t"><a class="dl" onclick="dvDown(${r.i})">${esc(r.n)}</a></td>${nlabel?`<td>${nf(r.cnt)}</td>`:''}${SUMCOLS.map(c=>`<td>${nf(r.s[c[1]])}</td>`).join('')}<td><span class="bar"><i style="width:${mp}%"></i></span> ${mp.toFixed(1)}%</td></tr>`});
+  h+=`</tbody><tfoot><tr class="tot"><td class="t"></td><td class="t">GRAND TOTAL</td>${nlabel?`<td>${nf(tc)}</td>`:''}${SUMCOLS.map(c=>`<td>${nf(tot[c[1]])}</td>`).join('')}<td>${pf(tot[8],tot[2])}</td></tr></tfoot></table></div>`;
+  $('#main').innerHTML=head+h;
+  dv._rows=rows;dv._label=label;dv._nl=nlabel;dv._tot=tot;dv._tc=tc;
+}
+window.dvCsv=function(){const hd=[dv._label].concat(dv._nl?[dv._nl]:[],SUMCOLS.map(c=>c[0]),['Match %']);
+  const rs=dv._rows.map(r=>[r.n].concat(dv._nl?[r.cnt]:[],SUMCOLS.map(c=>r.s[c[1]]),[pct(r.s[8],r.s[2]).toFixed(1)]));
+  rs.push(['GRAND TOTAL'].concat(dv._nl?[dv._tc]:[],SUMCOLS.map(c=>dv._tot[c[1]]),[pct(dv._tot[8],dv._tot[2]).toFixed(1)]));
+  downloadCSV('district_report_'+dv.level+'.csv',hd,rs)};
+function statusPill(gap){return gap>0?`<span class="pill p-p">Add ${gap} in APFR</span>`:gap<0?`<span class="pill p-e">APFR excess ${-gap}</span>`:`<span class="pill p-m">Matched</span>`}
+async function renderFarmers(head){
+  const v=dv.v;$('#main').innerHTML=head+`<div class="msg">Loading farmer data for ${esc(dv.d.n)}… (first load of a district may take a few seconds)</div>`;
+  let dd;try{dd=await loadDistrict(dv.d.c)}catch(e){$('#main').innerHTML=head+`<div class="msg err">${esc(e.message)}</div>`;return}
+  let rows=(dd[v[0]]||[]).map(r=>({id:r[0],a:r[1],e:r[2],k:r[3],s:r[4],gap:r[2]-r[1]}));
+  if(dv.st==='pend')rows=rows.filter(r=>r.gap>0);else if(dv.st==='exc')rows=rows.filter(r=>r.gap<0);else if(dv.st==='match')rows=rows.filter(r=>r.gap===0);
+  const q=dv.q.trim();if(q)rows=rows.filter(r=>String(r.id).includes(q)||r.k.split(',').some(x=>x.trim()===q)||(', '+r.s+',').includes(', '+q+','));
+  const sk=dv.sort.k;if(sk!==null){rows.sort((a,b)=>sk==='id'?dv.sort.dir*(a.id-b.id):dv.sort.dir*(a[sk]-b[sk]))}else rows.sort((a,b)=>b.gap-a.gap);
+  const T={n:rows.length,a:0,e:0,add:0,exc:0};rows.forEach(r=>{T.a+=r.a;T.e+=r.e;if(r.gap>0)T.add+=r.gap;else T.exc-=r.gap});
+  const PS=100,pages=Math.max(1,Math.ceil(rows.length/PS));if(dv.page>=pages)dv.page=0;const sl=rows.slice(dv.page*PS,dv.page*PS+PS);
+  let h=`<div class="tools"><input type="search" id="fq" placeholder="Farmer ID / khata / survey no." value="${esc(dv.q)}"><select id="fst"><option value="all">All farmers</option><option value="pend">To be added in APFR</option><option value="exc">APFR excess</option><option value="match">Matched</option></select><button onclick="dvFilter()">Apply</button><button class="sec" onclick="dvFarmCsv()">⬇ Download CSV (filtered)</button></div>
+  <div class="tw"><table><thead><tr><th class="t" onclick="dvSort('id')">Farmer ID</th><th class="t">ePanta khata no.</th><th class="t">ePanta survey numbers</th><th onclick="dvSort('e')">Total parcels ePanta</th><th onclick="dvSort('a')">Total parcels APFR</th><th onclick="dvSort('gap')">To be added in APFR</th><th class="t">Status</th></tr></thead><tbody>`;
+  sl.forEach(r=>{h+=`<tr><td class="t"><b>${r.id}</b></td><td class="t"><div class="sv">${esc(r.k)}</div></td><td class="t"><div class="sv">${esc(r.s)}</div></td><td>${r.e}</td><td>${r.a}</td><td>${r.gap>0?r.gap:0}</td><td class="t">${statusPill(r.gap)}</td></tr>`});
+  h+=`</tbody><tfoot><tr class="tot"><td class="t">GRAND TOTAL (${nf(T.n)} farmers)</td><td></td><td></td><td>${nf(T.e)}</td><td>${nf(T.a)}</td><td>${nf(T.add)}</td><td class="t">APFR excess: ${nf(T.exc)}</td></tr></tfoot></table></div>
+  <div class="pg"><button class="sec" ${dv.page?'':'disabled'} onclick="dvPage(-1)">◀ Prev</button><span>Page ${dv.page+1} / ${pages} · showing ${nf(sl.length)} of ${nf(rows.length)}</span><button class="sec" ${dv.page<pages-1?'':'disabled'} onclick="dvPage(1)">Next ▶</button></div>`;
+  $('#main').innerHTML=head+h;$('#fst').value=dv.st;dv._frows=rows;
+  $('#fq').onkeydown=e=>{if(e.key==='Enter')dvFilter()};
+}
+window.dvFilter=function(){dv.q=$('#fq').value;dv.st=$('#fst').value;dv.page=0;renderDist()};
+window.dvPage=function(d){dv.page+=d;renderDist()};
+window.dvFarmCsv=function(){downloadCSV('farmers_'+dv.v[1]+'.csv',['District','Mandal','Village','Farmer ID','ePanta khata numbers','ePanta survey numbers','Total parcels ePanta','Total parcels APFR','To be added in APFR','APFR excess'],dv._frows.map(r=>[dv.d.n,dv.m.n,dv.v[1],r.id,r.k,r.s,r.e,r.a,Math.max(r.gap,0),Math.max(-r.gap,0)]))};
+
+/* ---------- 3. Search ---------- */
+const S={};
+pages.srch=function(){
+  $('#main').innerHTML=`<h2>Farmer ID Search</h2><p class="lead">Select District → Mandal → Village → Khata number to see the farmer IDs and their parcels.</p>
+  <div class="card"><div class="tools">
+   <div><div class="note">District</div><select id="sd"></select></div>
+   <div><div class="note">Mandal</div><select id="sm"></select></div>
+   <div><div class="note">Village</div><select id="sv"></select></div>
+   <div><div class="note">Khata number</div><select id="sk"></select></div>
+   <div><div class="note">Farmer ID (optional)</div><input type="text" id="sf" placeholder="e.g. 10751043432"></div>
+   <div><div class="note">&nbsp;</div><button id="sb">Search</button></div></div>
+   <div class="note">Khata list is built from the farmers available in the selected village. Farmer ID box narrows the result inside the selected village.</div></div><div id="sres"></div>`;
+  const sd=$('#sd'),sm=$('#sm'),sv=$('#sv'),sk=$('#sk');
+  sd.innerHTML='<option value="">-- Select district --</option>'+DIST.map((d,i)=>`<option value="${i}">${esc(d.n)}</option>`).join('');
+  sm.innerHTML='<option value="">-- Select mandal --</option>';sv.innerHTML='<option value="">-- Select village --</option>';sk.innerHTML='<option value="">-- Select khata --</option>';
+  sd.onchange=()=>{const d=DIST[sd.value];sm.innerHTML='<option value="">-- Select mandal --</option>'+(d?d.m.map((m,i)=>`<option value="${i}">${esc(m.n)}</option>`).join(''):'');sv.innerHTML='<option value="">-- Select village --</option>';sk.innerHTML='<option value="">-- Select khata --</option>';$('#sres').innerHTML=''};
+  sm.onchange=()=>{const m=sm.value===''?null:DIST[sd.value].m[sm.value];sv.innerHTML='<option value="">-- Select village --</option>'+(m?m.v.map((v,i)=>`<option value="${i}">${esc(v[1])}</option>`).join(''):'');sk.innerHTML='<option value="">-- Select khata --</option>';$('#sres').innerHTML=''};
+  sv.onchange=async()=>{sk.innerHTML='<option value="">-- Select khata --</option>';$('#sres').innerHTML='';if(sv.value==='')return;
+    const d=DIST[sd.value],v=d.m[sm.value].v[sv.value];sk.innerHTML='<option value="">Loading…</option>';
+    try{const dd=await loadDistrict(d.c);const set=new Set();(dd[v[0]]||[]).forEach(r=>r[3].split(',').forEach(x=>{x=x.trim();if(x)set.add(x)}));
+      const arr=[...set].sort((a,b)=>{const x=parseFloat(a),y=parseFloat(b);return (isNaN(x)||isNaN(y))?a.localeCompare(b):x-y});
+      sk.innerHTML='<option value="">-- All khatas ('+nf(arr.length)+') --</option>'+arr.map(k=>`<option>${esc(k)}</option>`).join('')}
+    catch(e){sk.innerHTML='<option value="">-- Select khata --</option>';$('#sres').innerHTML=`<div class="msg err">${esc(e.message)}</div>`}};
+  $('#sb').onclick=doSearch;$('#sf').onkeydown=e=>{if(e.key==='Enter')doSearch()};
+};
+async function doSearch(){
+  const sd=$('#sd'),sm=$('#sm'),sv=$('#sv'),sk=$('#sk'),R=$('#sres');
+  if(sd.value===''||sm.value===''||sv.value===''){R.innerHTML='<div class="msg err">Please select district, mandal and village.</div>';return}
+  const d=DIST[sd.value],m=d.m[sm.value],v=m.v[sv.value],kh=sk.value,fid=$('#sf').value.trim();
+  R.innerHTML='<div class="msg">Searching…</div>';
+  let dd;try{dd=await loadDistrict(d.c)}catch(e){R.innerHTML=`<div class="msg err">${esc(e.message)}</div>`;return}
+  let rows=(dd[v[0]]||[]).map(r=>({id:r[0],a:r[1],e:r[2],k:r[3],s:r[4],gap:r[2]-r[1]}));
+  if(kh)rows=rows.filter(r=>r.k.split(',').some(x=>x.trim()===kh));
+  if(fid)rows=rows.filter(r=>String(r.id).includes(fid));
+  rows.sort((a,b)=>b.gap-a.gap);window._srows=rows;
+  const T={a:0,e:0,add:0,exc:0};rows.forEach(r=>{T.a+=r.a;T.e+=r.e;if(r.gap>0)T.add+=r.gap;else T.exc-=r.gap});
+  const lim=rows.slice(0,500);
+  R.innerHTML=`<div class="grid kpis" style="margin-top:14px">${kpi('Farmer IDs found',nf(rows.length),`${esc(d.n)} › ${esc(m.n)} › ${esc(v[1])}${kh?' › Khata '+esc(kh):''}`)}${kpi('Total parcels – ePanta',nf(T.e),'','v')}${kpi('Total parcels – APFR',nf(T.a),'','v')}${kpi('To be added in APFR',nf(T.add),'parcels','a')}</div>
+  ${rows.length?`<div class="tools"><button class="sec" onclick="downloadCSV('search_result.csv',['District','Mandal','Village','Farmer ID','ePanta khata numbers','ePanta survey numbers','Total parcels ePanta','Total parcels APFR','To be added in APFR'],_srows.map(r=>['${d.n.replace(/'/g,"\\'")}','${m.n.replace(/'/g,"\\'")}','${v[1].replace(/'/g,"\\'")}',r.id,r.k,r.s,r.e,r.a,Math.max(r.gap,0)]))">⬇ Download CSV</button>${rows.length>500?'<span class="note">Showing first 500 – download CSV for all.</span>':''}</div>
+  <div class="tw"><table><thead><tr><th class="t">Farmer ID</th><th class="t">ePanta khata no.</th><th>Total parcels ePanta</th><th>Total parcels APFR</th><th class="t">Survey numbers (ePanta)</th><th>To be added in APFR</th><th class="t">Status</th></tr></thead><tbody>
+  ${lim.map(r=>`<tr><td class="t"><b>${r.id}</b></td><td class="t"><div class="sv">${esc(r.k)}</div></td><td>${r.e}</td><td>${r.a}</td><td class="t"><div class="sv">${esc(r.s)}</div></td><td>${r.gap>0?r.gap:0}</td><td class="t">${statusPill(r.gap)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="msg">No farmer found for the selected criteria.</div>'}`;
+}
+
+/* ---------- 4. Field staff analytics ---------- */
+const A={d:'',m:''};
+pages.ana=function(){
+  const M=$('#main');
+  M.innerHTML=`<h2>Field Staff Analytics</h2><p class="lead">Prioritised work-lists to decide where to go first. Filter by district / mandal; click a village to open its farmer list.</p>
+  <div class="tools"><select id="ad"><option value="">All districts</option>${DIST.map((d,i)=>`<option value="${i}">${esc(d.n)}</option>`).join('')}</select><select id="am"><option value="">All mandals</option></select></div><div id="abody"></div>`;
+  const ad=$('#ad'),am=$('#am');ad.value=A.d;fillM();am.value=A.m;
+  function fillM(){am.innerHTML='<option value="">All mandals</option>'+(ad.value!==''?DIST[ad.value].m.map((m,i)=>`<option value="${i}">${esc(m.n)}</option>`).join(''):'')}
+  ad.onchange=()=>{A.d=ad.value;A.m='';fillM();anaBody()};am.onchange=()=>{A.m=am.value;anaBody()};anaBody();
+};
+window.openVillage=function(dc,mc,vc,st){const d=DIST.find(x=>x.c===dc),m=d.m.find(x=>x.c===mc),v=m.v.find(x=>x[0]===vc);dv={level:'village',d,m,v,sort:{k:null,dir:-1},page:0,q:'',st:st||'all'};cur='dist';document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.p==='dist'));renderDist()};
+function anaBody(){
+  let vs=A.d===''?ALLV:A.m===''?DIST[A.d].vil:DIST[A.d].m[A.m].v;
+  const S0=sumV(vs);
+  const scope=A.d===''?'Entire state':A.m===''?DIST[A.d].n:DIST[A.d].n+' › '+DIST[A.d].m[A.m].n;
+  const vrow=(v,extra)=>`<tr><td class="t">${esc(v[12])}</td><td class="t">${esc(v[13])}</td><td class="t"><a class="dl" onclick="openVillage(${v[14]},${v[15]},${v[0]},'${extra||'pend'}')">${esc(v[1])}</a></td>`;
+  const byPend=[...vs].filter(v=>v[7]>0).sort((a,b)=>b[7]-a[7]);
+  const quick=[...vs].filter(v=>v[11]>0).sort((a,b)=>b[11]-a[11]);
+  const low=[...vs].filter(v=>v[4]>=50).sort((a,b)=>pct(a[10],a[4])-pct(b[10],b[4]));
+  const done=vs.filter(v=>v[7]===0&&v[9]===0).length;
+  const bands=[0,0,0,0,0,0];vs.forEach(v=>{const p=pct(v[10],v[4]);bands[p>=100?5:p>=90?4:p>=75?3:p>=50?2:p>=25?1:0]++});
+  const mandals=A.d===''?DIST.flatMap(d=>d.m.map(m=>({n:m.n,d:d.n,s:m.s}))):DIST[A.d].m.map(m=>({n:m.n,d:DIST[A.d].n,s:m.s}));
+  const topM=mandals.sort((a,b)=>b.s[5]-a.s[5]).slice(0,15);
+  const tp=AGG.topPend.filter(r=>(A.d===''||r[1]===DIST[A.d].n)&&(A.m===''||r[2]===DIST[A.d].m[A.m].n)).slice(0,25);
+  const te=AGG.topExc.filter(r=>(A.d===''||r[1]===DIST[A.d].n)&&(A.m===''||r[2]===DIST[A.d].m[A.m].n)).slice(0,25);
+  const ftab=(arr,lab)=>`<div class="tw" style="max-height:380px"><table><thead><tr><th class="t">Farmer ID</th><th class="t">District</th><th class="t">Mandal</th><th class="t">Village</th><th class="t">Khata</th><th>ePanta</th><th>APFR</th><th>${lab}</th></tr></thead><tbody>${arr.map(r=>`<tr><td class="t"><b>${r[0]}</b></td><td class="t">${esc(r[1])}</td><td class="t">${esc(r[2])}</td><td class="t">${esc(r[3])}</td><td class="t">${esc(r[4])}</td><td>${r[6]}</td><td>${r[5]}</td><td><b>${Math.abs(r[7])}</b></td></tr>`).join('')||'<tr><td class="t" colspan=8>No records in this scope among the state top-300 list.</td></tr>'}</tbody></table></div>`;
+  $('#abody').innerHTML=`<div class="grid kpis">
+   ${kpi('Scope',esc(scope),nf(vs.length)+' villages')}
+   ${kpi('Pending parcels',nf(S0[5]),nf(S0[4])+' farmers to be updated','a')}
+   ${kpi('Villages fully matched',nf(done),pf(done,vs.length)+' of villages','g')}
+   ${kpi('Quick wins',nf(S0[9]),'farmers with only 1 parcel pending','a')}
+   ${kpi('APFR excess parcels',nf(S0[7]),nf(S0[6])+' farmers – verify duplicates','r')}</div>
+  <div class="grid two">
+   <div class="card"><h3>Village progress bands (matched parcels ÷ ePanta parcels)</h3>${vbars(['<25%','25–50%','50–75%','75–90%','90–<100%','100% (complete)'].map((l,i)=>({l,v:bands[i],c:i===5?C.green:i>=3?C.teal:i===2?C.amber:C.red})))}</div>
+   <div class="card"><h3>Top 15 mandals by pending parcels</h3>${hbars(topM.map(m=>({l:m.n+(A.d===''?' ('+m.d.slice(0,10)+')':''),v:m.s[5],c:C.amber})),{lw:200,w:600})}</div>
+  </div>
+  <div class="sect">1 · Priority villages – most parcels still to be booked in APFR</div>
+  <div class="tw" style="max-height:420px"><table><thead><tr><th class="t">District</th><th class="t">Mandal</th><th class="t">Village</th><th>Farmers</th><th>Farmers to add</th><th>Parcels to add</th><th>Match %</th></tr></thead><tbody>${byPend.slice(0,50).map(v=>vrow(v)+`<td>${nf(v[2])}</td><td>${nf(v[6])}</td><td><b>${nf(v[7])}</b></td><td>${pf(v[10],v[4])}</td></tr>`).join('')}</tbody></table></div>
+  <div class="note">Showing top 50 of ${nf(byPend.length)} villages with pending parcels. Click a village to open farmer list with pending filter (CSV download available there).</div>
+  <div class="sect">2 · Quick wins – villages with most farmers needing just 1 parcel</div>
+  <div class="tw" style="max-height:380px"><table><thead><tr><th class="t">District</th><th class="t">Mandal</th><th class="t">Village</th><th>Quick-win farmers</th><th>All farmers to add</th><th>Match %</th></tr></thead><tbody>${quick.slice(0,30).map(v=>vrow(v)+`<td><b>${nf(v[11])}</b></td><td>${nf(v[6])}</td><td>${pf(v[10],v[4])}</td></tr>`).join('')}</tbody></table></div>
+  <div class="sect">3 · Lowest match % villages (with ≥ 50 ePanta parcels)</div>
+  <div class="tw" style="max-height:380px"><table><thead><tr><th class="t">District</th><th class="t">Mandal</th><th class="t">Village</th><th>ePanta parcels</th><th>APFR parcels</th><th>Parcels to add</th><th>Match %</th></tr></thead><tbody>${low.slice(0,30).map(v=>vrow(v)+`<td>${nf(v[4])}</td><td>${nf(v[3])}</td><td>${nf(v[7])}</td><td><b>${pf(v[10],v[4])}</b></td></tr>`).join('')}</tbody></table></div>
+  <div class="sect">4 · Farmers with the largest number of parcels to be added in APFR</div>${ftab(tp,'To add')}
+  <div class="sect">5 · Data-quality alert: APFR has MORE parcels than ePanta (check duplicates / wrong entries)</div>${ftab(te,'APFR excess')}
+  <div class="note">Lists 4 and 5 are drawn from the state-wide top 300 farmers in each category. For the complete list of any village use the drill-down and CSV download.</div>`;
+}
+go('exec');
+</script></body></html>
