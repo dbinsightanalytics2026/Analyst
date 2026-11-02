@@ -47,7 +47,7 @@ td.hm{text-align:right;cursor:pointer;min-width:84px}td.hm.sel{outline:2px solid
 </style></head><body>
 <nav aria-label="Main">
 <h1>Cyclone Murasu Agriculture Impact</h1><p>Standing and vulnerable area, in hectares</p>
-<button data-v="dash" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard analytics 02-11-2026 at 5:10</button>
+<button data-v="dash" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard analytics</button>
 <button data-v="crop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V8M12 12c-4 0-6-2-6-6 4 0 6 2 6 6zM12 15c4 0 6-2 6-6-4 0-6 2-6 6z"/></svg>Crop-wise by district</button>
 <button data-v="drill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M8 12h12M12 18h8"/></svg>Drilldown</button>
 </nav>
@@ -75,7 +75,7 @@ return`<div class="tw"><table><thead><tr>${cols.map((c,i)=>`<th class="${c.r?'r'
 const dash=()=>{const rs=rows(),T=agg(rs,()=>1)[0]||{s:0,v:0,sa:0,r:new Set,m:new Set,c:new Set};
 const D=agg(rs,x=>x.d).sort((a,b)=>b.s-a.s),C=agg(rs,x=>x.c).sort((a,b)=>b.s-a.s).slice(0,10),Mn=agg(rs,x=>x.d+' › '+x.m).filter(a=>a.sa).sort((a,b)=>b.v-a.v).slice(0,10),Ty=agg(rs,x=>x.t);
 const mx=D[0]?.s||1,cx=C[0]?.s||1,mm=Mn[0]?.s||1;
-return head('Dashboard analytics',`${new Set(rs.map(x=>x.d)).size} districts, ${T.m.size} mandals and ${T.r.size} RSKs in the risk-area list`)+
+return head('Dashboard analytics 02-11-2026 at 5:10 PM',`${new Set(rs.map(x=>x.d)).size} districts, ${T.m.size} mandals and ${T.r.size} RSKs in the risk-area list`)+
 `<div class="kpis"><div><b>${f(T.s)}</b><small>Standing area (ha)</small></div><div><b>${f(T.v)}</b><small>Vulnerable area (ha)</small></div><div><b>${pc(T.v,T.sa)||'–'}</b><small>Vulnerable share of assessed crops</small></div><div><b>${f(T.r.size)}</b><small>RSKs affected</small></div><div><b>${T.c.size}</b><small>Crops</small></div></div>
 <div class="grid"><section class="panel"><h3>Area by district</h3><p>Dark bar is vulnerable area within standing area.</p>${LEG}${D.map(a=>`<div class="row"><span class="n" title="${esc(a.k)}">${esc(a.k)}</span>${bw(a.s,mx,a.v)}<span class="v">${f(a.s)}</span></div>`).join('')}</section>
 <section class="panel"><h3>Impact level by district</h3><p>Share of standing area in each impact level.</p>${IMPLEG}${D.map(a=>`<div class="row"><span class="n" title="${esc(a.k)}">${esc(a.k)}</span>${stack(a)}<span class="v">${Math.round(a.imp['extremely heavy']/(a.s||1)*100)}% ext.</span></div>`).join('')}</section>
